@@ -6,6 +6,7 @@ program komputer untuk menemukan nilai konstanta dari suatu fungsi peramalan sah
 dengan asumsi fungsi prediksi adalah:
   
   f(x)=a0 + a1.y1 + a2.y2 + a3.y3 + .... + a10.y10
+  
 
 dimana:
   
@@ -14,6 +15,7 @@ dimana:
   a0, a1 … a10 adalah suatu konstanta yang dicari
   
   y1, y2, … yn adalah nilai saham hari ke 1 sampai hari ke 10
+  
   
 Hal yang diobservasi: 
   
@@ -33,6 +35,7 @@ Hal yang diobservasi:
   
   • Kriteria Penghentian Evolusi 
   
+  
 Proses yang harus dibangun (bisa berupa fungsi/prosedur): 
   
   • Dekode kromosom 
@@ -46,5 +49,6 @@ Proses yang harus dibangun (bisa berupa fungsi/prosedur):
   • Mutasi 
   
   • Pergantian Generasi 
+  
   
 Output dari sistem adalah kromosom terbaik dan hasil prediksi 50 hari (Hari, Prediksi, Nilai Real, Delta) menggunkaan hasil dekode kromosom terbaik tersebut. 
