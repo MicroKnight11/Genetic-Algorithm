@@ -12,10 +12,10 @@ dimana:
   y1, y2, … yn adalah nilai saham hari ke 1 sampai hari ke 10
   
 Hal yang diobservasi: 
-  • Kumpulkan tabel data saham yang digunakan (minimal 100) dan sertakan sumbernya
-  • Desain Kromosom dan Metode Pendekodean 
-  • Ukuran Populasi 
-  • Pemilihan orangtua 
+• Kumpulkan tabel data saham yang digunakan (minimal 100) dan sertakan sumbernya
+• Desain Kromosom dan Metode Pendekodean 
+• Ukuran Populasi 
+• Pemilihan orangtua 
   • Pemilihan dan teknik operasi genetik (crossover dan mutasi) 
   • Probabilitas operasi genetik (Pc dan Pm) 
   • Metode Pergantian Generasi (Seleksi Survivor) 
