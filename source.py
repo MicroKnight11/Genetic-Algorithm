@@ -39,13 +39,14 @@ def fitness(pop: Populasi, nilai: Nilai_saham, harga: Harga_saham) :
     fit_score = []
     for kromosom in pop:
         y = hitung_harga(kromosom, nilai_10)
-        fit_score += [1/abs(harga - y)]
+        fit_score += [1/(1+abs(harga - y))]
     total = np.sum(fit_score)
     probabilitas = []
     for score in fit_score:
         probabilitas += [score/total]
     return probabilitas
 
+# versi jurnal
 #     sigma = 1
 #     for i in range(10):
 #         y = hitung_harga()
@@ -96,9 +97,18 @@ def mutasi(kromosom: Kromosom) -> Kromosom:
 # print('crossover = ', kromosom_cross)
 # print('mutasi    = ', mutasi(kromosom_cross))
 
+#main
 pop = initiate_pop()
-print('intiate pop: ', pop)
-parent = parent_selection(pop,hitung_nilai(),150000)
-print('parent: ', parent)
-pop = generate_pop(parent)
-print('new pop: ', pop)
+gen = 1
+harga = 150000
+nilai = hitung_nilai()
+# kondisi = 
+while gen < max_generation: #&& !kondisi:
+    parent = parent_selection(pop, nilai, harga)
+    pop = generate_pop(parent)
+    gen += 1
+print('generasi: ', gen)
+print('best pop: ', pop)
+best_kromosom = choices(pop, weights=fitness(pop, nilai, harga), k=1)[0]
+print('best kromosom: ', best_kromosom)
+print('forcast saham: ', hitung_harga(best_kromosom, nilai[-10:]))
