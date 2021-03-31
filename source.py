@@ -3,82 +3,70 @@
 from random import choices, randint
 from typing import List
 import numpy as np
+import csv
+from math import sqrt
 
 # typing
 Nilai_saham = List[int]
 Kromosom = List[int]
-Harga_saham = List[int]
 Populasi = List[Kromosom]
 
 # global variabel
-pm = 0.2 # probabilitas mutasi
 pc = 0 # probabilitas crossover
 max_pop = 10
-max_generation = 10
+max_generation = 1000
 
 def generate_kromosom() -> Kromosom:
     # generate [a0, a1, ..., a10]
     return [randint(-100,100) for i in range(11)]
 
 def hitung_harga(konstanta: Kromosom, nilai: Nilai_saham):
-    # harga = f(x)=a0 + a1.y1 + a2.y2 + a3.y3 + .... + a10.y10
+    # f(x) = a0 + a1.y1 + a2.y2 + a3.y3 + .... + a10.y10
     # a = konstanta, y = nilai
     nilai = np.insert(nilai, 0, 1)
     return sum(np.multiply(konstanta, nilai))
 
-def hitung_nilai() -> Nilai_saham:
-    # op = open, cl = close
-    # nilai = (open + close) / 2
-    op = [randint(0,20000) for i in range(100)]
-    cl = [randint(0,20000) for i in range(100)]
-    nilai = np.rint(np.add(op, cl)/2)
-    return nilai
+def fitness_kromosom(kromosom: Kromosom, nilai: Nilai_saham, harga: int) -> float :
+    y = hitung_harga(kromosom, nilai)
+    return 1/(0.00000000000000000000000000000000000000000001+abs(harga - y))
 
-def fitness(pop: Populasi, nilai: Nilai_saham, harga: Harga_saham) :
-    nilai_10 = nilai[-10:]
-    fit_score = []
-    for kromosom in pop:
-        y = hitung_harga(kromosom, nilai_10)
-        fit_score += [1/(1+abs(harga - y))]
-    total = np.sum(fit_score)
-    probabilitas = []
-    for score in fit_score:
-        probabilitas += [score/total]
-    return probabilitas
-
-# versi jurnal
-#     sigma = 1
+# def fitness_jurnal(kromosom: Kromosom, saham: Nilai_saham) -> float:
+#     sigma = 0
 #     for i in range(10):
-#         y = hitung_harga()
-#         inv_y = harga_saham[i] - y
-#         sigma += np.power(inv_y, 2)
-#     epsilon = 1/10*(sqrt(sigma))
+#         y = hitung_harga(kromosom,saham[i+1:i+11])
+#         inv_y = saham[i] - y
+#         # print('y', inv_y)
+#         sigma += int(abs(inv_y ** 2))
+#     # print(sigma)
+#     epsilon = (1/10)*sqrt(sigma)
 #     return 1/epsilon
 
 
 def initiate_pop() -> Populasi:
     return [generate_kromosom() for i in range(max_pop)]
 
-def generate_pop(parent: Populasi) -> Populasi:
-    return [mutasi(crossover(parent[0],parent[1])) for i in range(max_pop)]
+def regen_pop(populasi: Populasi, parent: Populasi) -> Populasi:
+    populasi = populasi[:len(populasi)-2]
+    populasi += crossover(parent[0],parent[1])
+    return [mutasi(kromosom) for kromosom in populasi]
 
-def parent_selection(populasi: Populasi, nilai: Nilai_saham, harga: Harga_saham) -> Populasi:
+def parent_selection(populasi: Populasi, nilai: Nilai_saham, harga: int) -> Populasi:
     return choices(
         populasi,
-        weights=fitness(populasi, nilai, harga),
+        weights=[fitness_kromosom(kromosom, nilai, harga) for kromosom in populasi],
         k=2
     )
 
-def crossover(parentA: Kromosom, parentB:Kromosom) -> Kromosom:
-    # if np.random.random_sample() < pc:
+# def parent_selection(populasi: Populasi, saham: Nilai_saham) -> Populasi:
+#     return choices(
+#         populasi,
+#         weights=[fitness_jurnal(kromosom, saham) for kromosom in populasi],
+#         k=2
+#     )
+
+def crossover(parentA: Kromosom, parentB:Kromosom) -> tuple[Kromosom, Kromosom]:
     i = randint(1,10)
-    # print('titik potong', i)
-    return parentA[0:i] + parentB[i:]
-    # else:
-    #     if randint(0,1):
-    #         return parentA
-    #     else:
-    #         return parentB 
+    return parentA[0:i] + parentB[i:], parentB[0:i] + parentA[i:]
 
 def mutasi(kromosom: Kromosom) -> Kromosom:
     for i in range(0,len(kromosom)):
@@ -86,29 +74,33 @@ def mutasi(kromosom: Kromosom) -> Kromosom:
             kromosom[i] = randint(-100,100)
     return kromosom
 
-# nilai = hitung_nilai()
-# a = generate_kromosom()
-# b = generate_kromosom()
-
-# print('a = ', a)
-# print('b = ', b)
-
-# kromosom_cross = crossover(a, b) 
-# print('crossover = ', kromosom_cross)
-# print('mutasi    = ', mutasi(kromosom_cross))
 
 #main
 pop = initiate_pop()
-gen = 1
-harga = 150000
-nilai = hitung_nilai()
-# kondisi = 
+print('initiate pop: ', pop)
+pm = 1/(len(pop)*len(pop[0])) # probabilitas mutasi = 1 / banyak gen
+gen = 0
+saham = [1495, 1530, 1530, 1550, 1560, 1580, 1570, 1550, 1550, 1515, 1575, 1550, 1485, 1470, 1465, 1530, 1510, 1510, 1540, 1550, 1610]
+harga = saham[0]
+nilai = saham[1:11]
+error = 0.05
 while gen < max_generation: #&& !kondisi:
-    parent = parent_selection(pop, nilai, harga)
-    pop = generate_pop(parent)
     gen += 1
-print('generasi: ', gen)
-print('best pop: ', pop)
-best_kromosom = choices(pop, weights=fitness(pop, nilai, harga), k=1)[0]
-print('best kromosom: ', best_kromosom)
-print('forcast saham: ', hitung_harga(best_kromosom, nilai[-10:]))
+    # sort berdasarkan fitness score
+    pop = sorted(
+        pop,
+        # key=lambda Kromosom: fitness_jurnal(Kromosom, saham),
+        key=lambda Kromosom: fitness_kromosom(Kromosom, nilai, harga),
+        reverse=True
+    )
+    parent = parent_selection(pop, nilai, harga)
+    pop = regen_pop(pop, parent)
+pop = sorted(
+    pop,
+    # key=lambda Kromosom: fitness_jurnal(Kromosom, saham),
+    key=lambda Kromosom: fitness_kromosom(Kromosom, nilai, harga),
+    reverse=True
+)
+print('best kromosom: ', pop[0])
+print('forcast harga saham: ', hitung_harga(pop[0],nilai))
+
