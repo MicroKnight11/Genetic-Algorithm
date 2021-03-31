@@ -1,6 +1,6 @@
 # Genetic Algorithm
 # import math
-from random import choices, randint
+from random import choices, randint, uniform
 from typing import List
 import numpy as np
 import csv
@@ -12,13 +12,12 @@ Kromosom = List[int]
 Populasi = List[Kromosom]
 
 # global variabel
-pc = 0 # probabilitas crossover
 max_pop = 10
 max_generation = 1000
 
 def generate_kromosom() -> Kromosom:
     # generate [a0, a1, ..., a10]
-    return [randint(-100,100) for i in range(11)]
+    return [uniform(-100,100) for i in range(11)]
 
 def hitung_harga(konstanta: Kromosom, nilai: Nilai_saham):
     # f(x) = a0 + a1.y1 + a2.y2 + a3.y3 + .... + a10.y10
@@ -71,7 +70,7 @@ def crossover(parentA: Kromosom, parentB:Kromosom) -> tuple[Kromosom, Kromosom]:
 def mutasi(kromosom: Kromosom) -> Kromosom:
     for i in range(0,len(kromosom)):
         if np.random.random_sample() < pm:
-            kromosom[i] = randint(-100,100)
+            kromosom[i] = uniform(-100,100)
     return kromosom
 
 
@@ -83,24 +82,20 @@ gen = 0
 saham = [1495, 1530, 1530, 1550, 1560, 1580, 1570, 1550, 1550, 1515, 1575, 1550, 1485, 1470, 1465, 1530, 1510, 1510, 1540, 1550, 1610]
 harga = saham[0]
 nilai = saham[1:11]
-error = 0.05
+error = 0.1
 while gen < max_generation: #&& !kondisi:
     gen += 1
     # sort berdasarkan fitness score
-    pop = sorted(
-        pop,
-        # key=lambda Kromosom: fitness_jurnal(Kromosom, saham),
-        key=lambda Kromosom: fitness_kromosom(Kromosom, nilai, harga),
-        reverse=True
-    )
+    fit = [fitness_kromosom(kromosom, nilai, harga) for kromosom in pop]
+    pop = [x for _,x in sorted(zip(fit,pop),reverse=True)]
+    fit = sorted(fit,reverse=True)
+    print(fit[0])
+    if (fit[0] > error):
+        break
     parent = parent_selection(pop, nilai, harga)
     pop = regen_pop(pop, parent)
-pop = sorted(
-    pop,
-    # key=lambda Kromosom: fitness_jurnal(Kromosom, saham),
-    key=lambda Kromosom: fitness_kromosom(Kromosom, nilai, harga),
-    reverse=True
-)
+pop = [x for _,x in sorted(zip(fit,pop),reverse=True)]
+print('generasi: ', gen)
 print('best kromosom: ', pop[0])
-print('forcast harga saham: ', hitung_harga(pop[0],nilai))
+print('forcast harga saham: ', round(hitung_harga(pop[0],nilai)))
 
