@@ -12,12 +12,12 @@ Kromosom = List[int]
 Populasi = List[Kromosom]
 
 # global variabel
-max_pop = 1000
-max_generation = 10
+max_pop = 100
+max_generation = 1000
 
 def generate_kromosom() -> Kromosom:
     # generate [a0, a1, ..., a10]
-    return [uniform(-100,100) for i in range(11)]
+    return [uniform(-2,2) for i in range(11)]
 
 def hitung_harga(konstanta: Kromosom, nilai: Nilai_saham):
     # f(x) = a0 + a1.y1 + a2.y2 + a3.y3 + .... + a10.y10
@@ -88,7 +88,7 @@ def crossover(parentA: Kromosom, parentB: Kromosom, pc: int) -> Populasi:
 def mutasi(kromosom: Kromosom) -> Kromosom:
     for i in range(0,len(kromosom)):
         if np.random.random_sample() < pm:
-            kromosom[i] = uniform(-100,100)
+            kromosom[i] = uniform(-2,2)
     return kromosom
 
 #main
@@ -98,7 +98,8 @@ pm = 1/(len(pop)*len(pop[0])) # probabilitas mutasi = 1 / banyak gen
 pc = round(0.4 * max_pop)
 gen = 0
 dataset = pd.read_excel('dataset.xlsx', usecols='B')
-saham = dataset.values[:21]
+awal = 20
+saham = dataset.values[awal:awal+21]
 # saham = [1495, 1530, 1530, 1550, 1560, 1580, 1570, 1550, 1550, 1515, 1575, 1550, 1485, 1470, 1465, 1530, 1510, 1510, 1540, 1550, 1610]
 # saham = [1635,1685,1685,1705,1700,1720,1700,1650,1680,1700,1675,1605,1675,1745,1770,1775,1785,1760,1770,1810,1860]
 harga = saham[0]
@@ -121,10 +122,10 @@ while gen < max_generation: #&& !kondisi:
 # fit = [fitness_kromosom(kromosom, nilai, harga) for kromosom in pop]
 fit = [fitness_jurnal(kromosom, saham) for kromosom in pop]
 pop = [x for _,x in sorted(zip(fit,pop),reverse=True)]
-print(pop)
+# print(pop)
 print('generasi: ', gen)
 print('best kromosom: ', pop[0])
-print('forcast harga saham: ', round(hitung_harga(pop[0],nilai)))
+print('forcast harga saham: ', round(hitung_harga(pop[0],saham[:10])))
 # print(saham)
 # x = np.array(pop[0][1:])
 # y = np.array(saham[0:10])
