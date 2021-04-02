@@ -13,7 +13,7 @@ Populasi = List[Kromosom]
 
 # global variabel
 max_pop = 100
-max_generation = 1000
+max_generation = 1000   
 
 def generate_kromosom() -> Kromosom:
     # generate [a0, a1, ..., a10]
@@ -92,40 +92,49 @@ def mutasi(kromosom: Kromosom) -> Kromosom:
     return kromosom
 
 #main
-pop = initiate_pop()
-print('initiate pop: ', pop)
-pm = 1/(len(pop)*len(pop[0])) # probabilitas mutasi = 1 / banyak gen
+
+# print('initiate pop: ', pop)
+pm = 1/(max_pop*11) # probabilitas mutasi = 1 / banyak gen
 pc = round(0.4 * max_pop)
 gen = 0
+jumlah_hari = 50
 dataset = pd.read_excel('dataset.xlsx', usecols='B')
-awal = 20
+awal = 60
 saham = dataset.values[awal:awal+21]
 # saham = [1495, 1530, 1530, 1550, 1560, 1580, 1570, 1550, 1550, 1515, 1575, 1550, 1485, 1470, 1465, 1530, 1510, 1510, 1540, 1550, 1610]
 # saham = [1635,1685,1685,1705,1700,1720,1700,1650,1680,1700,1675,1605,1675,1745,1770,1775,1785,1760,1770,1810,1860]
 harga = saham[0]
 nilai = saham[1:11]
-error = 1
-while gen < max_generation: #&& !kondisi:
-    gen += 1
-    # sort berdasarkan fitness score
+error = 0.1
+forecast = []
+for i in range(1, jumlah_hari+1):
+    pop = initiate_pop()
+    # print('ini i = ', i)
+    while gen < max_generation:
+        gen += 1
+        # sort berdasarkan fitness score
+        # fit = [fitness_kromosom(kromosom, nilai, harga) for kromosom in pop]
+        fit = [fitness_jurnal(kromosom, saham) for kromosom in pop]
+        pop = [x for _,x in sorted(zip(fit,pop),reverse=True)]
+        fit = sorted(fit,reverse=True)
+        # print(fit[0])
+        if (fit[0] > error):
+            break
+        # parent = parent_selection(pop, nilai, harga)
+        parent = parent_selection_jurnal(pop, saham, fit)
+        # print(parent)
+        pop = regen_pop(pop, parent, pc)
     # fit = [fitness_kromosom(kromosom, nilai, harga) for kromosom in pop]
     fit = [fitness_jurnal(kromosom, saham) for kromosom in pop]
     pop = [x for _,x in sorted(zip(fit,pop),reverse=True)]
-    fit = sorted(fit,reverse=True)
-    print(fit[0])
-    if (fit[0] > error):
-        break
-    # parent = parent_selection(pop, nilai, harga)
-    parent = parent_selection_jurnal(pop, saham, fit)
-    # print(parent)
-    pop = regen_pop(pop, parent, pc)
-# fit = [fitness_kromosom(kromosom, nilai, harga) for kromosom in pop]
-fit = [fitness_jurnal(kromosom, saham) for kromosom in pop]
-pop = [x for _,x in sorted(zip(fit,pop),reverse=True)]
-# print(pop)
-print('generasi: ', gen)
-print('best kromosom: ', pop[0])
-print('forcast harga saham: ', round(hitung_harga(pop[0],saham[:10])))
+    best = pop[0]
+    print('best kromosom hari ke-',i,': ', best)
+    harga_prediksi = round(hitung_harga(best,saham[:10]))
+    forecast += [[i,harga_prediksi,int(saham[0]), int(abs(saham[0] - harga_prediksi))]]
+    # saham = saham[:len(saham)-1]
+    # saham = np.insert(saham, 0, harga_prediksi)
+    saham = dataset.values[awal-i:awal+21-i]
+print('forecast harga saham: ', forecast)
 # print(saham)
 # x = np.array(pop[0][1:])
 # y = np.array(saham[0:10])
